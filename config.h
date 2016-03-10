@@ -23,4 +23,4 @@ static const char timeformat[] = "%a %d %b, %H:%M";
 
 /* Statusline formatting */
 #define FORMATSTRING "  %s   |     %s   |     %s   |     %s   |   %s\n"
-#define ARGUMENTS temperature, battery, volume, music, datetime
+#define ARGUMENTS &temperature, &battery, &volume, &music, &datetime
