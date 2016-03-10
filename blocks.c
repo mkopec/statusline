@@ -14,10 +14,31 @@
 #include "config.h"
 #include "blocks.h"
 
+char *get_battery_icon(int battery_state)
+{
+    char *icon = malloc(2);
+
+    if (battery_state > 80) {
+        strcpy(icon, "");
+    } else if (battery_state > 60) {
+        strcpy(icon, "");
+    } else if (battery_state > 40) {
+        strcpy(icon, "");
+    } else if (battery_state > 20) {
+        strcpy(icon, "");
+    } else {
+        strcpy(icon, "");
+    }
+
+    return icon;
+}
+
 /* Battery percentage */
 char *get_battery()
 {
     int energy_now, energy_full;
+    char *icon;
+    float battery_state;
     char *battery_string = malloc(1024);
 
     FILE *fp;
@@ -40,10 +61,33 @@ char *get_battery()
     fscanf(fp, "%i", &energy_full);
     fclose(fp);
 
-    /* Format battery level nicely */
-    sprintf(battery_string, "%d%%", energy_now / (energy_full / 100));
+    /* Calculate current battery state */
+    battery_state = (float)energy_now / (float)energy_full * 100;
 
+    /* Get appropriate battery icon */
+    icon = get_battery_icon(battery_state);
+
+    /* Format battery level nicely */
+    sprintf(battery_string, "%s  %.0f%%", icon, battery_state);
+
+    free(icon);
+    
     return battery_string;
+}
+
+char *get_volume_icon(int volume_percentage)
+{
+    char *icon = malloc(2);
+
+    if (volume_percentage > 50) {
+        strcpy(icon, "");
+    } else if (volume_percentage > 0){
+        strcpy(icon, "");
+    } else {
+        strcpy(icon, "");
+    }
+
+    return icon;
 }
 
 /* Volume percentage */
@@ -51,6 +95,8 @@ char *get_volume()
 {
     int mute = 0;
     long volume_now = 0, volume_max = 0, volume_min = 0;
+    int volume_percentage;
+    char *icon;
     char *volume_string = malloc(1024);
 
     /* Create new ALSA mixer and connect it to the specified soundcard */
@@ -82,10 +128,21 @@ char *get_volume()
     if (handle)
         snd_mixer_close(handle);
 
-    if (!mute)
-        strcpy(volume_string, "mute");
-    else
-        sprintf(volume_string, "%ld%%", (volume_now * 100) / volume_max);
+    /* Calculate current volume percentage */
+    volume_percentage = (volume_now * 100) / volume_max;
+
+    /* Get appropriate icon */
+    icon = get_volume_icon(volume_percentage);
+
+    if (!mute) {
+        icon = get_volume_icon(0);
+        sprintf(volume_string, "%s  mute", icon);
+    } else {
+        icon = get_volume_icon(volume_percentage);
+        sprintf(volume_string, "%s  %d%%", icon, volume_percentage);
+    }
+
+    free(icon);
 
     return volume_string;
 }
@@ -104,9 +161,9 @@ char *get_music()
 
     /* Show only if something is playing */
     if (music_title != NULL) {
-        sprintf(music_string, "%s - %s", music_artist, music_title);
+        sprintf(music_string, "  %s - %s", music_artist, music_title);
     } else {
-        sprintf(music_string, "none");
+        sprintf(music_string, "  none");
     }
 
     return music_string;
@@ -148,7 +205,7 @@ char *get_temperature()
     fclose(fp);
 
     /* Format the temperature nicely */
-    sprintf(temperature_string, "%d °C", temperature_now / 1000);
+    sprintf(temperature_string, "  %d °C", temperature_now / 1000);
 
     return temperature_string;
 }
