@@ -71,7 +71,7 @@ char *get_battery()
     sprintf(battery_string, "%s  %.0f%%", icon, battery_state);
 
     free(icon);
-    
+
     return battery_string;
 }
 
@@ -165,6 +165,9 @@ char *get_music()
     } else {
         sprintf(music_string, "  none");
     }
+
+    g_free(music_artist);
+    g_free(music_title);
 
     return music_string;
 }
